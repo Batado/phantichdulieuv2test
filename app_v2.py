@@ -52,20 +52,4 @@ if uploaded_file:
     # Áp dụng bộ lọc
     data_filtered = data[
         (data["Khu vực"].isin(selected_region)) &
-        (data["Mã Nhóm KH"].isin(selected_group))
-    ]
-    if selected_customer != "Tất cả":
-        data_filtered = data_filtered[data_filtered["Tên khách hàng"] == selected_customer]
-
-    # Xử lý dữ liệu (Chuyển kiểu ngày/thời gian và tổng hợp)
-    data_filtered["Ngày chứng từ"] = pd.to_datetime(data_filtered["Ngày chứng từ"], errors="coerce")
-    data_filtered["Tháng"] = data_filtered["Ngày chứng từ"].dt.to_period("M")  # Lấy thông tin tháng
-    data_filtered["Quý"] = data_filtered["Ngày chứng từ"].dt.to_period("Q")  # Lấy thông tin quý
-    data_filtered["Thành tiền bán"] = pd.to_numeric(data_filtered["Thành tiền bán"], errors="coerce").fillna(0)
-    data_filtered["Lợi nhuận"] = pd.to_numeric(data_filtered["Lợi nhuận"], errors="coerce").fillna(0)
-    
-    # Visualizations for Sales and Profit
-    st.write("### 🌟 Tổng Quan")
-    total_sales = data_filtered["Thành tiền bán"].sum()
-    total_profit = data_filtered["Lợi nhuận"].sum()
-    total_weight =
+       
