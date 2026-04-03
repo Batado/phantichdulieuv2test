@@ -37,19 +37,8 @@ if uploaded_file:
     # Hiển thị dữ liệu
     st.title("📊 Phân Tích Dữ Liệu Bán Hàng")
     st.write("### 🔍 Dữ Liệu Gốc")
-    st.dataframe(data.head(10))  # Hiển thị trước 10 dòng đầu
+    st.dataframe(data.head(10))  # Hiển thị 10 dòng đầu
 
     # Các bộ lọc cơ bản
     st.sidebar.header("🔍 Bộ Lọc Dữ Liệu")
-    unique_customers = data["Tên khách hàng"].dropna().unique()
-    unique_regions = data["Khu vực"].dropna().unique()
-    unique_groups = data["Mã Nhóm KH"].dropna().unique()
-
-    selected_customer = st.sidebar.selectbox("Chọn Khách Hàng", options=["Tất cả"] + list(unique_customers))
-    selected_region = st.sidebar.multiselect("Chọn Khu Vực", options=unique_regions, default=unique_regions)
-    selected_group = st.sidebar.multiselect("Chọn Mã Nhóm KH", options=unique_groups, default=unique_groups)
-
-    # Áp dụng bộ lọc
-    data_filtered = data[
-        (data["Khu vực"].isin(selected_region)) &
-       
+    unique_customers = data["Tên khách hàng"].
