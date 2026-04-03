@@ -1,7 +1,5 @@
 import io
 import warnings
-warnings.filterwarnings("ignore")
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -9,13 +7,18 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
+# Ignore warnings
+warnings.filterwarnings("ignore")
+
+# Streamlit Configuration
 st.set_page_config(
-    page_title="Phan tich KH - Hoa Sen",
+    page_title="Phân Tích KH - Hoa Sen",
     layout="wide",
     page_icon="📊",
     initial_sidebar_state="expanded"
 )
 
+# CSS styling for Streamlit page
 CSS = """
 <style>
 @import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap");
@@ -40,17 +43,19 @@ section[data-testid="stSidebar"] *{color:#c9d1d9 !important;}
 """
 st.markdown(CSS, unsafe_allow_html=True)
 
+# Pre-defined Constants
 NHOM_SP = [
-    ("Ong HDPE",        "HDPE"),
-    ("Ong PVC nuoc",    r"PVC.*(?:nuoc|nong dai|nong tron|thoat|cap)"),
-    ("Ong PVC bom cat", r"PVC.*(?:cat|bom cat)"),
-    ("Ong PPR",         "PPR"),
-    ("Loi PVC",         r"(?:Loi|loi|lori)"),
-    ("Phu kien & Keo",  r"(?:Noi|Co |Te |Van |Keo |Mang|Bit|Y PVC|Y PPR|Giam|Cut)"),
+    ("Ống HDPE", "HDPE"),
+    ("Ống PVC nước", r"PVC.*(?:nước|nong dài|nong tròn|thoát|cấp)"),
+    ("Ống PVC bơm cát", r"PVC.*(?:cát|bơm cát)"),
+    ("Ống PPR", "PPR"),
+    ("Lõi PVC", r"(?:Lõi|loi|lori)"),
+    ("Phụ kiện & Keo", r"(?:Nối|Co |Tê |Van |Keo |Măng|Bịt|Y PVC|Y PPR|Giảm|Cút)"),
 ]
 
 COLOR_SEQ = ["#388bfd", "#56d364", "#e3b341", "#ffa198", "#79c0ff", "#d2a8ff", "#ffb800", "#3fb950", "#bc8cff", "#ff7b72"]
 
+# Plotly Default Settings
 PLOTLY_BASE = dict(
     paper_bgcolor="#0d1117",
     plot_bgcolor="#0d1117",
@@ -61,8 +66,68 @@ PLOTLY_BASE = dict(
     colorway=COLOR_SEQ,
 )
 
+# Utility Functions
 def pl(fig, **kw):
+    """Apply default Plotly settings."""
     d = {**PLOTLY_BASE, **kw}
     fig.update_layout(**d)
     fig.update_xaxes(gridcolor="#21262d", linecolor="#30363d")
-    fig.update_yaxes(gridcolor="#21262d", linecolor="#303
+    fig.update_yaxes(gridcolor="#21262d", linecolor="#30363d")
+    return fig
+
+def fmt(v):
+    """Format numeric values to readable format."""
+    try:
+        f = float(v)
+        if abs(f) >= 1e9:
+            return "{:.2f} tỷ".format(f / 1e9)
+        elif abs(f) >= 1e6:
+            return "{:.1f} triệu".format(f / 1e6)
+        else:
+            return "{:,.0f}".format(f)
+    except Exception:
+        return str(v)
+
+def fmt_full(v):
+    """Full numeric formatting."""
+    try:
+        return "{:,.0f}".format(float(v))
+    except Exception:
+        return str(v)
+
+# Sidebar File Uploader
+st.sidebar.markdown("## Upload File Dữ Liệu")
+uploaded_files = st.sidebar.file_uploader("Chọn File Excel", type=["xlsx"], accept_multiple_files=True)
+
+if not uploaded_files:
+    st.markdown('<div class="page-title">Phân Tích Dữ Liệu - Hoa Sen</div>', unsafe_allow_html=True)
+    st.info("Vui lòng tải lên file Excel để bắt đầu.")
+    st.stop()
+
+# Load data with caching for better efficiency
+@st.cache_data(show_spinner="Đang xử lý dữ liệu...")
+def load_files(files):
+    """Load all Excel files into a single DataFrame."""
+    all_data = []
+    for file in files:
+        try:
+            data = pd.read_excel(io.BytesIO(file.read()), engine="openpyxl")
+            data["_file"] = file.name
+            all_data.append(data)
+        except Exception as e:
+            st.warning(f"Lỗi khi tải dữ liệu từ {file.name}: {e}")
+    return pd.concat(all_data, ignore_index=True) if all_data else pd.DataFrame()
+
+data = load_files(uploaded_files)
+
+# Validate loaded data
+if data.empty:
+    st.error("Không có dữ liệu hợp lệ. Vui lòng kiểm tra file uploaded.")
+    st.stop()
+
+# Main Logic (Overview KPI)
+st.markdown('<div class="page-title">📊 Tổng Quan</div>', unsafe_allow_html=True)
+total_sales = data["DoanhThu"].sum()  # Example: replace this with actual column name
+total_profit = data["LoiNhuan"].sum()  # Example
+st.write(f"Tổng doanh thu: {fmt(total_sales)}")
+st.write(f"Tổng lợi nhuận: {fmt(total_profit)}")
