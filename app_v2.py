@@ -1,92 +1,71 @@
 import io
-import warnings
-import streamlit as st
 import pandas as pd
 import numpy as np
+import streamlit as st
 import plotly.express as px
 
-# Ignore warnings
-warnings.filterwarnings("ignore")
-
-# Configure the Streamlit app page
+# Cấu hình Streamlit
 st.set_page_config(
-    page_title="Phân Tích Dữ Liệu Excel",
+    page_title="Phân Tích Dữ Liệu Bán Hàng",
     layout="wide",
     page_icon="📊",
-    initial_sidebar_state="expanded",
 )
 
-# Streamlit style with CSS
-st.markdown("""
-    <style>
-        body {font-family: "Be Vietnam Pro", sans-serif;}
-        section[data-testid="stSidebar"] {
-            background-color: #0d1117;
-            color: #c9d1d9;
-        }
-    </style>
-""", unsafe_allow_html=True)
-
-# Function to load the Excel file
-@st.cache_data(show_spinner="Đang xử lý dữ liệu...")
-def load_excel_file(uploaded_file):
+# Hàm tải tệp Excel
+@st.cache_data(show_spinner="Đang tải dữ liệu...")
+def load_excel(file):
     try:
-        return pd.read_excel(io.BytesIO(uploaded_file.read()), engine="openpyxl")
+        return pd.read_excel(io.BytesIO(file.read()), engine="openpyxl")
     except Exception as e:
-        st.error(f"Lỗi khi tải tệp Excel: {e}")
+        st.error(f"Lỗi khi đọc file Excel: {e}")
         return pd.DataFrame()
 
-# Sidebar for file upload
-st.sidebar.title("Tải Dữ Liệu Excel")
-uploaded_file = st.sidebar.file_uploader("Chọn file Excel của bạn", type=["xlsx"])
+# Tải file Excel qua sidebar
+st.sidebar.title("🗂 Tải File Dữ Liệu")
+uploaded_file = st.sidebar.file_uploader("Chọn file Excel (*.xlsx)", type=["xlsx"])
 
-# Execute the application when a file is uploaded
+# Xử lý file tải lên
 if uploaded_file:
-    # Load Excel data
-    data = load_excel_file(uploaded_file)
+    # Đọc file
+    data = load_excel(uploaded_file)
 
-    # Verify if data is valid
+    # Kiểm tra file rỗng
     if data.empty:
-        st.error("❌ File Excel không có dữ liệu hoặc không hợp lệ.")
-    else:
-        st.title("📊 Phân Tích Dữ Liệu")
-        st.write("### 🚀 Xem nhanh 5 dòng đầu tiên trong dữ liệu:")
-        st.dataframe(data.head())  # Display the first 5 rows
+        st.error("❌ File Excel không có dữ liệu hoặc định dạng không đúng.")
+        st.stop()
 
-        # Check and handle specific columns
-        if "DoanhThu" in data.columns and "LoiNhuan" in data.columns:
-            # Safely convert columns to numeric and handle missing values
-            data["DoanhThu"] = pd.to_numeric(data["DoanhThu"], errors="coerce").fillna(0)
-            data["LoiNhuan"] = pd.to_numeric(data["LoiNhuan"], errors="coerce").fillna(0)
+    # Hiển thị dữ liệu
+    st.title("📊 Phân Tích Dữ Liệu Bán Hàng")
+    st.write("### 🔍 Dữ Liệu Gốc")
+    st.dataframe(data.head(10))  # Hiển thị trước 10 dòng đầu
 
-            # Calculate key metrics
-            total_sales = data["DoanhThu"].sum()
-            total_profit = data["LoiNhuan"].sum()
-            num_rows = data.shape[0]  # Total number of rows
-            num_columns = data.shape[1]  # Total number of columns
+    # Các bộ lọc cơ bản
+    st.sidebar.header("🔍 Bộ Lọc Dữ Liệu")
+    unique_customers = data["Tên khách hàng"].dropna().unique()
+    unique_regions = data["Khu vực"].dropna().unique()
+    unique_groups = data["Mã Nhóm KH"].dropna().unique()
 
-            # Display KPIs
-            st.write("### ⭐ Các Khóa Chỉ Số Quan Trọng:")
-            col1, col2, col3, col4 = st.columns(4)
-            col1.metric("Tổng Dòng", f"{num_rows:,}")
-            col2.metric("Tổng Cột", f"{num_columns:,}")
-            col3.metric("Doanh thu (Tổng)", f"{total_sales:,.0f} VND")
-            col4.metric("Lợi nhuận (Tổng)", f"{total_profit:,.0f} VND")
+    selected_customer = st.sidebar.selectbox("Chọn Khách Hàng", options=["Tất cả"] + list(unique_customers))
+    selected_region = st.sidebar.multiselect("Chọn Khu Vực", options=unique_regions, default=unique_regions)
+    selected_group = st.sidebar.multiselect("Chọn Mã Nhóm KH", options=unique_groups, default=unique_groups)
 
-            # Visualize Data
-            st.write("### 📈 Biểu Đồ Phân Tích:")
-            scatter_fig = px.scatter(
-                data,
-                x="DoanhThu",
-                y="LoiNhuan",
-                title="Quan hệ giữa Doanh thu và Lợi nhuận",
-                labels={"DoanhThu": "Doanh Thu (VND)", "LoiNhuan": "Lợi Nhuận (VND)"},
-                color="DoanhThu",
-                color_continuous_scale="Viridis"
-            )
-            st.plotly_chart(scatter_fig, use_container_width=True)
-        else:
-            st.error("❌ File Excel của bạn thiếu cột 'DoanhThu' hoặc 'LoiNhuan'. Vui lòng kiểm tra lại.")
-else:
-    st.title("📊 Phân Tích Dữ Liệu Excel")
-    st.info("👐 Vui lòng tải một file Excel định dạng `.xlsx` để bắt đầu phân tích.")
+    # Áp dụng bộ lọc
+    data_filtered = data[
+        (data["Khu vực"].isin(selected_region)) &
+        (data["Mã Nhóm KH"].isin(selected_group))
+    ]
+    if selected_customer != "Tất cả":
+        data_filtered = data_filtered[data_filtered["Tên khách hàng"] == selected_customer]
+
+    # Xử lý dữ liệu (Chuyển kiểu ngày/thời gian và tổng hợp)
+    data_filtered["Ngày chứng từ"] = pd.to_datetime(data_filtered["Ngày chứng từ"], errors="coerce")
+    data_filtered["Tháng"] = data_filtered["Ngày chứng từ"].dt.to_period("M")  # Lấy thông tin tháng
+    data_filtered["Quý"] = data_filtered["Ngày chứng từ"].dt.to_period("Q")  # Lấy thông tin quý
+    data_filtered["Thành tiền bán"] = pd.to_numeric(data_filtered["Thành tiền bán"], errors="coerce").fillna(0)
+    data_filtered["Lợi nhuận"] = pd.to_numeric(data_filtered["Lợi nhuận"], errors="coerce").fillna(0)
+    
+    # Visualizations for Sales and Profit
+    st.write("### 🌟 Tổng Quan")
+    total_sales = data_filtered["Thành tiền bán"].sum()
+    total_profit = data_filtered["Lợi nhuận"].sum()
+    total_weight =
