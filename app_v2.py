@@ -1,73 +1,44 @@
 import io
+import streamlit as st
 import pandas as pd
 import numpy as np
-import streamlit as st
 import plotly.express as px
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
-# Cấu hình trang Streamlit
-st.set_page_config(
-    page_title="Phân Tích Dữ Liệu Bán Hàng",
-    layout="wide",
-    page_icon="📊"
-)
+# Cấu hình Streamlit
+st.set_page_config(page_title="Phân tích KH - Hoa Sen", layout="wide", page_icon="📊")
 
-# Hàm đọc dữ liệu Excel và lưu cache
-@st.cache_data(show_spinner="Đang tải và xử lý dữ liệu...")
-def load_excel(file):
-    try:
-        # Đọc file Excel
-        data = pd.read_excel(io.BytesIO(file.read()), engine="openpyxl")
-        return data
-    except Exception as e:
-        st.error(f"Lỗi khi đọc file Excel: {e}")
-        return pd.DataFrame()
+# Các hàm và tiện ích đã tồn tại như cũ
+# ...
 
-# Sidebar: Tải file Excel
-st.sidebar.title("🗂 Tải File Dữ Liệu")
-uploaded_file = st.sidebar.file_uploader("Chọn file Excel (*.xlsx)", type=["xlsx"])
+# Load file Excel (tương tự mã code trước đó)
 
-# Kiểm tra file được tải lên
-if uploaded_file:
-    # Đọc dữ liệu
-    data = load_excel(uploaded_file)
+# --- Bổ sung thêm bộ lọc theo Tên nhóm KH, Khu vực và Điểm rủi ro ---
+st.sidebar.markdown("---")
+st.sidebar.markdown("## 🔍 Bộ lọc nâng cao")
 
-    # Kiểm tra dữ liệu hợp lệ không
-    if data.empty:
-        st.error("❌ File Excel không hợp lệ hoặc không có dữ liệu.")
-        st.stop()
+# 1. Lọc theo Tên nhóm khách hàng
+if "Tên nhóm KH" in df_all.columns:
+    group_list = sorted(df_all["Tên nhóm KH"].dropna().unique())
+    selected_group = st.sidebar.multiselect("✅ Tên nhóm KH", group_list, default=group_list)
+    df_all = df_all[df_all["Tên nhóm KH"].isin(selected_group)]
 
-    # -> Thêm bước: In ra danh sách các cột trong file để kiểm tra tên
-    st.write("### 📋 Tên các cột trong dữ liệu:")
-    st.write(data.columns.tolist())
+# 2. Lọc theo Khu vực
+if "Khu vực" in df_all.columns:
+    region_list = sorted(df_all["Khu vực"].dropna().unique())
+    selected_region = st.sidebar.multiselect("📍 Khu vực", region_list, default=region_list)
+    df_all = df_all[df_all["Khu vực"].isin(selected_region)]
 
-    # Kiểm tra sự tồn tại của cột "Ngày chứng từ"
-    if "Ngày chứng từ" in data.columns:
-        # Làm sạch dữ liệu "Ngày chứng từ"
-        data["Ngày chứng từ"] = pd.to_datetime(data["Ngày chứng từ"], errors="coerce")
-        data["Tháng"] = data["Ngày chứng từ"].dt.to_period("M")  # Tạo cột để phân tích theo tháng
-    else:
-        st.error("❌ Cột 'Ngày chứng từ' không tồn tại. Vui lòng kiểm tra lại file Excel.")
-        st.stop()
+# 3. Lọc theo Điểm rủi ro từ cao đến thấp
+sort_risk = st.sidebar.checkbox("🔽 Sắp xếp theo điểm rủi ro (Cao → Thấp)", value=False)
 
-    # Làm sạch các cột khác
-    if "Thành tiền bán" in data.columns:
-        data["Thành tiền bán"] = pd.to_numeric(data["Thành tiền bán"], errors="coerce").fillna(0)
-    else:
-        st.error("❌ Cột 'Thành tiền bán' không tồn tại. Vui lòng kiểm tra lại file.")
-        st.stop()
+# Áp dụng sắp xếp theo điểm rủi ro nếu cần
+if sort_risk and "Điểm rủi ro" in df_all.columns:
+    df_all = df_all.sort_values(by="Điểm rủi ro", ascending=False)
 
-    if "Lợi nhuận" in data.columns:
-        data["Lợi nhuận"] = pd.to_numeric(data["Lợi nhuận"], errors="coerce").fillna(0)
-    else:
-        st.warning("⚠️ Dữ liệu 'Lợi nhuận' không tồn tại. Một số phân tích lợi nhuận sẽ không có.")
-
-    # Hiển thị dữ liệu sau khi làm sạch
-    st.title("📊 Phân Tích Dữ Liệu Bán Hàng")
-    st.write("### Dữ Liệu Gốc (Sau Khi Làm Sạch)")
-    st.dataframe(data.head(10))  # Hiển thị 10 dòng đầu tiên
-
-    # Tổng Quan Dữ Liệu
-    st.write("### 🌟 Tổng Quan Dữ Liệu")
-    total_revenue = data["Thành tiền bán"].sum()
-    total_profit = data["Lợi nhuận"].sum()
-    total_orders
+# Tiếp tục hiển thị dữ liệu đã lọc
+df = df_all[
+    (df_all["Tên khách hàng"].astype(str) == kh) &
+    (df_all["Quý"].isin(quy_chon))
+].copy()
