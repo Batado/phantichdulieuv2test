@@ -1,19 +1,13 @@
 import io
-import warnings
-warnings.filterwarnings(“ignore”)
-import unicodedata
-
 import streamlit as st
 import pandas as pd
-import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-st.set_page_config(page_title=“Phan tich KH - Hoa Sen”, layout=“wide”, page_icon=“U+1F4CA”)
+st.set_page_config(page_title="Phân tích KH – Hoa Sen", layout="wide", page_icon="📊")
 
-st.markdown(”””
-
+st.markdown("""
 <style>
 .risk-high   { background:#4a1010; border-left:4px solid #e74c3c; padding:10px 14px; border-radius:6px; margin:6px 0; color:#fff; }
 .risk-medium { background:#3d2e10; border-left:4px solid #f39c12; padding:10px 14px; border-radius:6px; margin:6px 0; color:#fff; }
@@ -21,17 +15,8 @@ st.markdown(”””
 .section-title { font-size:17px; font-weight:700; color:#e0e0e0; margin:20px 0 10px 0;
                  padding-bottom:6px; border-bottom:1px solid #2e3350; }
 .info-box { background:#1a2035; border-radius:8px; padding:14px; margin:8px 0; color:#ccc; }
-.filter-label { font-size:12px; color:#9aa0b0; margin-bottom:2px; }
-.risk-badge-cao   { display:inline-block; background:#4a1010; color:#e74c3c; border:1px solid #e74c3c;
-                    padding:1px 8px; border-radius:10px; font-size:11px; font-weight:700; }
-.risk-badge-tb    { display:inline-block; background:#3d2e10; color:#f39c12; border:1px solid #f39c12;
-                    padding:1px 8px; border-radius:10px; font-size:11px; font-weight:700; }
-.risk-badge-thap  { display:inline-block; background:#0f3020; color:#26c281; border:1px solid #26c281;
-                    padding:1px 8px; border-radius:10px; font-size:11px; font-weight:700; }
 </style>
-
-“””, unsafe_allow_html=True)
-
+""", unsafe_allow_html=True)
 
 # ======================================================
 
