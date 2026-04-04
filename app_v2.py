@@ -448,45 +448,60 @@ with tab3:
             st.markdown('<div class="risk-low">✅ Không phát hiện tháng bất thường về biên lợi nhuận.</div>', unsafe_allow_html=True)
 
     # Hàng trả lại
+# Kiểm tra dữ liệu và cột cần thiết trước khi truy cập
+# Xử lý dữ liệu hàng trả lại
+if df.empty:
+    st.warning("❌ DataFrame `df` bị rỗng. Vui lòng kiểm tra lại bộ lọc hoặc dữ liệu đầu vào.")
+    st.stop()
+
 if "Loại GD" not in df.columns:
-    st.warning("❌ Không tìm thấy cột 'Loại GD'. Kiểm tra tệp đầu vào.")
-else:
-    df_tra = df[df["Loại GD"] == "Trả hàng"]  # Lọc dữ liệu Loại GD = 'Trả hàng'
+    st.error("❌ Cột `Loại GD` không tồn tại trong dữ liệu. Vui lòng kiểm tra file đầu vào hoặc tên cột.")
+    st.stop()
 
-    if not df_tra.empty:
-        st.markdown('<div class="section-title">↩️ Đơn hàng trả lại</div>', unsafe_allow_html=True)
+# Lọc dữ liệu cho hàng Trả Hàng
+df_tra = df[df["Loại GD"] == "Trả hàng"]
 
-        # Kiểm tra các cột cần hiển thị có tồn tại hay không
-        show = [c for c in ["Số chứng từ", "Ngày chứng từ", "Tên hàng",
-                             "Khối lượng", "Thành tiền bán", "Ghi chú"] if c in df_tra.columns]
-        df_tra_s = df_tra[show].copy()
+if not df_tra.empty:
+    st.markdown('<div class="section-title">↩️ Đơn hàng trả lại</div>', unsafe_allow_html=True)
 
-        # Định dạng cột "Thành tiền bán" nếu tồn tại
-        if "Thành tiền bán" in df_tra_s.columns:
-            df_tra_s["Thành tiền bán"] = df_tra_s["Thành tiền bán"].map("{:,.0f}".format)
+    # Lọc các cột cần hiển thị nếu tồn tại
+    show = [c for c in ["Số chứng từ", "Ngày chứng từ", "Tên hàng",
+                        "Khối lượng", "Thành tiền bán", "Ghi chú"] if c in df_tra.columns]
+    df_tra_s = df_tra[show].copy()
 
-        # Hiển thị giá trị tổng và bảng hàng trả lại
-        st.dataframe(df_tra_s, use_container_width=True, hide_index=True)
-        total_tra_hang = df_tra["Thành tiền bán"].sum() if "Thành tiền bán" in df_tra.columns else 0
+    # Định dạng giá trị "Thành tiền bán" nếu cột tồn tại
+    if "Thành tiền bán" in df_tra_s.columns:
+        df_tra_s["Thành tiền bán"] = df_tra_s["Thành tiền bán"].map("{:,.0f}".format)
+
+    # Hiển thị bảng dữ liệu hàng trả lại
+    st.dataframe(df_tra_s, use_container_width=True, hide_index=True)
+
+    # Tính tổng giá trị trả hàng nếu cột tồn tại
+    if "Thành tiền bán" in df_tra.columns:
+        total_tra_hang = df_tra["Thành tiền bán"].sum()
         st.error(f"Tổng giá trị trả hàng: **{abs(total_tra_hang):,.0f} VNĐ**")
-    else:
-        st.info("Không có đơn hàng nào thuộc 'Trả hàng'.")
+else:
+    st.info("✅ Không có đơn hàng nào thuộc 'Trả hàng'.")
 
 # Hiển thị chi tiết giá bán từng giao dịch
-# Chỉ thực thi nếu `df_ban` tồn tại và không rỗng
-if "Ngày chứng từ" not in df_ban.columns:
-    st.warning("❌ Không tìm thấy cột 'Ngày chứng từ' trong dữ liệu xuất bán.")
+if df_ban.empty:
+    st.warning("❌ Dữ liệu `df_ban` rỗng. Không thể hiển thị chi tiết giá bán.")
 else:
-    with st.expander("📋 Chi tiết giá bán từng giao dịch"):
-        # Lọc và hiển thị các cột hợp lệ trong bảng giao dịch
-        show2 = [c for c in ["Số chứng từ", "Ngày chứng từ", "Tên hàng",
-                              "Giá bán", "Đơn giá quy đổi", "Thành tiền bán",
-                              "Lợi nhuận", "Ghi chú"] if c in df_ban.columns]
-        if show2:
-            df_ban_sorted = df_ban[show2].sort_values("Ngày chứng từ")  # Sắp xếp theo ngày
-            st.dataframe(df_ban_sorted, use_container_width=True, hide_index=True)
-        else:
-            st.info("Dữ liệu giao dịch không có các cột được yêu cầu.")
+    if "Ngày chứng từ" not in df_ban.columns:
+        st.warning("❌ Không tìm thấy cột `Ngày chứng từ` trong dữ liệu `df_ban`.")
+    else:
+        with st.expander("📋 Chi tiết giá bán từng giao dịch"):
+            # Kiểm tra và chỉ hiển thị các cột có trong dữ liệu
+            show2 = [c for c in ["Số chứng từ", "Ngày chứng từ", "Tên hàng",
+                                 "Giá bán", "Đơn giá quy đổi", "Thành tiền bán",
+                                 "Lợi nhuận", "Ghi chú"] if c in df_ban.columns]
+
+            # Nếu các cột hợp lệ tồn tại, thực hiện lọc và hiển thị
+            if show2:
+                df_ban_sorted = df_ban[show2].sort_values("Ngày chứng từ")
+                st.dataframe(df_ban_sorted, use_container_width=True, hide_index=True)
+            else:
+                st.info("Dữ liệu giao dịch không có các cột được yêu cầu.")
 # ══════════════════════════════════════════════════════════════
 #  TAB 4
 # ══════════════════════════════════════════════════════════════
