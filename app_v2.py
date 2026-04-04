@@ -448,7 +448,6 @@ with tab3:
             st.markdown('<div class="risk-low">✅ Không phát hiện tháng bất thường về biên lợi nhuận.</div>', unsafe_allow_html=True)
 
     # Hàng trả lại
-    # Hàng trả lại
     df_tra = df[df["Loại GD"] == "Trả hàng"]
     if not df_tra.empty:
         st.markdown('<div class="section-title">↩️ Đơn hàng trả lại</div>', unsafe_allow_html=True)
