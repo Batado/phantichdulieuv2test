@@ -410,6 +410,19 @@ with tab2:
 with tab3:
     st.markdown('<div class="section-title">💹 Biến động lợi nhuận & phát hiện chính sách</div>', unsafe_allow_html=True)
 
+    # Đảm bảo `df_ban` không bị rỗng
+    if df_ban.empty:
+        st.warning("❌ Không có dữ liệu 'Xuất bán' để phân tích trong Tab 3. Vui lòng kiểm tra điều kiện lọc.")
+        st.stop()
+
+    # Kiểm tra cột `Loại GD` và các cột liên quan trong `df_ban`
+    required_columns = ["Thành tiền bán", "Thành tiền vốn", "Lợi nhuận", "Tháng"]
+    for col in required_columns:
+        if col not in df_ban.columns:
+            st.warning(f"❌ Thiếu cột `{col}` trong dữ liệu. Vui lòng kiểm tra lại tệp dữ liệu.")
+            st.stop()
+            
+    # Tính toán lợi nhuận, doanh thu và biến động biên LN
     df_ln = (df_ban.groupby("Tháng")
              .agg(DT=("Thành tiền bán", "sum"),
                   Von=("Thành tiền vốn", "sum"),
@@ -417,6 +430,7 @@ with tab3:
              .reset_index().sort_values("Tháng"))
     df_ln["Biên (%)"] = (df_ln["LN"] / df_ln["DT"].replace(0, float("nan")) * 100).round(2).fillna(0)
 
+    # Vẽ biểu đồ doanh thu / lợi nhuận / giá vốn theo tháng
     fig = make_subplots(rows=2, cols=1, shared_xaxes=True,
                         subplot_titles=("Doanh thu / Vốn / Lợi nhuận (VNĐ)", "Biên lợi nhuận (%)"),
                         vertical_spacing=0.14)
@@ -435,8 +449,8 @@ with tab3:
     # Phát hiện tháng bất thường
     if len(df_ln) >= 2:
         mean_b = df_ln["Biên (%)"].mean()
-        std_b  = df_ln["Biên (%)"].std()
-        anom   = df_ln[df_ln["Biên (%)"] < mean_b - max(std_b, 1)]
+        std_b = df_ln["Biên (%)"].std()
+        anom = df_ln[df_ln["Biên (%)"] < mean_b - max(std_b, 1)]  # Ngưỡng bất thường
         st.markdown('<div class="section-title">🔍 Tháng nghi có chiết khấu / chính sách đặc biệt</div>', unsafe_allow_html=True)
         if not anom.empty:
             for _, r in anom.iterrows():
@@ -446,62 +460,6 @@ with tab3:
                     unsafe_allow_html=True)
         else:
             st.markdown('<div class="risk-low">✅ Không phát hiện tháng bất thường về biên lợi nhuận.</div>', unsafe_allow_html=True)
-
-    # Hàng trả lại
-# Kiểm tra dữ liệu và cột cần thiết trước khi truy cập
-# Xử lý dữ liệu hàng trả lại
-if df.empty:
-    st.warning("❌ DataFrame `df` bị rỗng. Vui lòng kiểm tra lại bộ lọc hoặc dữ liệu đầu vào.")
-    st.stop()
-
-if "Loại GD" not in df.columns:
-    st.error("❌ Cột `Loại GD` không tồn tại trong dữ liệu. Vui lòng kiểm tra file đầu vào hoặc tên cột.")
-    st.stop()
-
-# Lọc dữ liệu cho hàng Trả Hàng
-df_tra = df[df["Loại GD"] == "Trả hàng"]
-
-if not df_tra.empty:
-    st.markdown('<div class="section-title">↩️ Đơn hàng trả lại</div>', unsafe_allow_html=True)
-
-    # Lọc các cột cần hiển thị nếu tồn tại
-    show = [c for c in ["Số chứng từ", "Ngày chứng từ", "Tên hàng",
-                        "Khối lượng", "Thành tiền bán", "Ghi chú"] if c in df_tra.columns]
-    df_tra_s = df_tra[show].copy()
-
-    # Định dạng giá trị "Thành tiền bán" nếu cột tồn tại
-    if "Thành tiền bán" in df_tra_s.columns:
-        df_tra_s["Thành tiền bán"] = df_tra_s["Thành tiền bán"].map("{:,.0f}".format)
-
-    # Hiển thị bảng dữ liệu hàng trả lại
-    st.dataframe(df_tra_s, use_container_width=True, hide_index=True)
-
-    # Tính tổng giá trị trả hàng nếu cột tồn tại
-    if "Thành tiền bán" in df_tra.columns:
-        total_tra_hang = df_tra["Thành tiền bán"].sum()
-        st.error(f"Tổng giá trị trả hàng: **{abs(total_tra_hang):,.0f} VNĐ**")
-else:
-    st.info("✅ Không có đơn hàng nào thuộc 'Trả hàng'.")
-
-# Hiển thị chi tiết giá bán từng giao dịch
-if df_ban.empty:
-    st.warning("❌ Dữ liệu `df_ban` rỗng. Không thể hiển thị chi tiết giá bán.")
-else:
-    if "Ngày chứng từ" not in df_ban.columns:
-        st.warning("❌ Không tìm thấy cột `Ngày chứng từ` trong dữ liệu `df_ban`.")
-    else:
-        with st.expander("📋 Chi tiết giá bán từng giao dịch"):
-            # Kiểm tra và chỉ hiển thị các cột có trong dữ liệu
-            show2 = [c for c in ["Số chứng từ", "Ngày chứng từ", "Tên hàng",
-                                 "Giá bán", "Đơn giá quy đổi", "Thành tiền bán",
-                                 "Lợi nhuận", "Ghi chú"] if c in df_ban.columns]
-
-            # Nếu các cột hợp lệ tồn tại, thực hiện lọc và hiển thị
-            if show2:
-                df_ban_sorted = df_ban[show2].sort_values("Ngày chứng từ")
-                st.dataframe(df_ban_sorted, use_container_width=True, hide_index=True)
-            else:
-                st.info("Dữ liệu giao dịch không có các cột được yêu cầu.")
 # ══════════════════════════════════════════════════════════════
 #  TAB 4
 # ══════════════════════════════════════════════════════════════
