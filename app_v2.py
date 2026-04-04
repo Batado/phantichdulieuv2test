@@ -776,7 +776,7 @@ mc[3].metric("GT tra hang (VND)", "{:,.0f}".format(abs(df_tra2["Thanh tien ban"]
 
 st.markdown("""
 ```
-
+st.markdown("""
 <div class="info-box">
 <b>File OM_RPT_055 khong co ngay thanh toan thuc te.</b><br>
 Can bo sung: So cong no phai thu (AR Aging), Lich su thanh toan.<br>
