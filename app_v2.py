@@ -25,6 +25,7 @@ st.markdown("""
 st.sidebar.header("📂 Tải lên dữ liệu")
 uploaded_file = st.sidebar.file_uploader("Chọn file Excel báo cáo bán hàng", type=["xlsx"])
 
+# Nếu chưa upload thì dừng app
 if uploaded_file is None:
     st.markdown("## 👈 Vui lòng tải lên file Excel để bắt đầu phân tích")
     st.stop()
