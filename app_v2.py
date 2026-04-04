@@ -220,9 +220,6 @@ if df_all.empty:
 # ══════════════════════════════════════════════════════════════
 #  SIDEBAR FILTERS
 # ══════════════════════════════════════════════════════════════
-# Load dữ liệu
-df = load_data(uploaded_file)
-
 # Bộ lọc
 st.sidebar.header("🔍 Bộ lọc")
 
