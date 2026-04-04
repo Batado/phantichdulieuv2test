@@ -245,7 +245,6 @@ if "Khu vực" in df_filtered.columns:
         default=unique_areas
     )
     df_filtered = df_filtered[df_filtered["Khu vực"].isin(selected_areas)]  # Lọc theo
-
 # ══════════════════════════════════════════════════════════════
 #  TABS
 # ══════════════════════════════════════════════════════════════
