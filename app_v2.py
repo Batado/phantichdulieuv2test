@@ -10,9 +10,9 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-st.set_page_config(page_title=“Phan tich KH - Hoa Sen”, layout=“wide”, page_icon=“U+1F4CA”)
+st.set_page_config(page_title="Phan tich KH - Hoa Sen", layout="wide", page_icon="U+1F4CA")
 
-st.markdown(”””
+st.markdown("""
 
 <style>
 .risk-high   { background:#4a1010; border-left:4px solid #e74c3c; padding:10px 14px; border-radius:6px; margin:6px 0; color:#fff; }
