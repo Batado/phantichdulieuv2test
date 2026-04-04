@@ -22,6 +22,7 @@ st.markdown("""
 #  UPLOAD
 # ══════════════════════════════════════════════════════════════
 # Upload
+# Upload
 st.sidebar.header("📂 Tải lên dữ liệu")
 uploaded_file = st.sidebar.file_uploader("Chọn file Excel báo cáo bán hàng", type=["xlsx"])
 
@@ -29,15 +30,14 @@ uploaded_file = st.sidebar.file_uploader("Chọn file Excel báo cáo bán hàng
 if uploaded_file is None:
     st.markdown("## 👈 Vui lòng tải lên file Excel để bắt đầu phân tích")
     st.stop()
+else:
+    # Chỉ gọi load_data khi uploaded_file có giá trị
+    df = load_data(uploaded_file)
 
-# Chỉ gọi load_data khi uploaded_file có giá trị
-df = load_data(uploaded_file)
-
-# Nếu không có dữ liệu thì dừng
-if df is None or df.empty:
-    st.error("❌ Không có dữ liệu hợp lệ trong file Excel.")
-    st.stop()
-
+    # Nếu không có dữ liệu thì dừng
+    if df is None or df.empty:
+        st.error("❌ Không có dữ liệu hợp lệ trong file Excel.")
+        st.stop()
 # ══════════════════════════════════════════════════════════════
 #  HÀM TIỆN ÍCH
 # ══════════════════════════════════════════════════════════════
