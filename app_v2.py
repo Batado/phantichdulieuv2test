@@ -30,7 +30,7 @@ st.markdown("""
                     padding:1px 8px; border-radius:10px; font-size:11px; font-weight:700; }
 </style>
 
-“””, unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
 # ======================================================
 
