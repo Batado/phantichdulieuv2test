@@ -162,13 +162,11 @@ with tab6:
         st.dataframe(df_region, use_container_width=True)
 
 # TAB 7 – Top KH theo Phòng KD
-with tab7:
-    st.markdown('<div class="section-title">🏆 Top KH theo Phòng KD</div>', unsafe_allow_html=True)
-   Đạt ơi, lỗi line 163 là do đoạn code bị viết dở dang, thiếu đóng ngoặc và thiếu phần hiển thị bảng/thị phần. Tôi đã viết lại toàn bộ file `app.py` hoàn chỉnh, sạch cú pháp, để bạn có thể copy lên GitHub và chạy ngay trên Streamlit Cloud.  
+with tab7Đạt ơi, nguyên nhân bạn bị lỗi là vì trong file `.py` có lẫn cả phần giải thích tiếng Việt của tôi. Python chỉ chạy code, không chấp nhận đoạn văn bản ngoài code. Tôi sẽ đưa bạn **toàn bộ code sạch sẽ, không có chú thích thừa, không lỗi cú pháp** để bạn copy vào GitHub và chạy ngay trên Streamlit Cloud.
 
 ---
 
-### 📦 Code hoàn chỉnh
+### 📦 File `app.py` hoàn chỉnh
 
 ```python
 import io
@@ -181,9 +179,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-# ─────────────────────────────────────────────
 # CONFIG
-# ─────────────────────────────────────────────
 st.set_page_config(
     page_title="Phân tích KH - Hoa Sen",
     layout="wide",
@@ -198,9 +194,7 @@ body { background-color: #0e1117; color: #c9d1d9; }
 </style>
 """, unsafe_allow_html=True)
 
-# ─────────────────────────────────────────────
 # UPLOAD
-# ─────────────────────────────────────────────
 st.sidebar.header("📂 Tải lên dữ liệu")
 uploaded_file = st.sidebar.file_uploader("Chọn file Excel báo cáo bán hàng", type=["xlsx"])
 
@@ -208,9 +202,7 @@ if not uploaded_file:
     st.markdown("## 👈 Vui lòng tải lên file Excel để bắt đầu phân tích")
     st.stop()
 
-# ─────────────────────────────────────────────
 # LOAD DATA
-# ─────────────────────────────────────────────
 @st.cache_data
 def load_data(file):
     df = pd.read_excel(file, engine="openpyxl")
@@ -223,9 +215,7 @@ def load_data(file):
 
 df = load_data(uploaded_file)
 
-# ─────────────────────────────────────────────
 # FILTERS
-# ─────────────────────────────────────────────
 st.sidebar.header("🔍 Bộ lọc")
 
 pkd_list = sorted(df["Tên nhóm KH"].dropna().unique()) if "Tên nhóm KH" in df.columns else []
@@ -246,9 +236,7 @@ if kv: df_filtered = df_filtered[df_filtered["Khu vực"].isin(kv)]
 if kh: df_filtered = df_filtered[df_filtered["Tên khách hàng"] == kh]
 if quy: df_filtered = df_filtered[df_filtered["Quý"].isin(quy)]
 
-# ─────────────────────────────────────────────
 # HEADER
-# ─────────────────────────────────────────────
 st.title("📊 Phân tích dữ liệu bán hàng")
 if kh: st.subheader(f"Khách hàng: {kh}")
 
@@ -257,9 +245,7 @@ if "Ngày chứng từ" in df_filtered.columns:
     dmax = df_filtered["Ngày chứng từ"].max()
     st.markdown(f"**Khoảng thời gian:** {dmin.strftime('%d/%m/%Y')} → {dmax.strftime('%d/%m/%Y')}")
 
-# ─────────────────────────────────────────────
 # TABS
-# ─────────────────────────────────────────────
 tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
     "📦 Thói quen mua hàng",
     "📈 Doanh thu & Khối lượng",
@@ -270,7 +256,7 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
     "🏆 Top KH theo Phòng KD"
 ])
 
-# TAB 1 – Thói quen mua hàng
+# TAB 1
 with tab1:
     st.markdown('<div class="section-title">📦 Thói quen mua hàng theo sản phẩm</div>', unsafe_allow_html=True)
     if "Tên hàng" in df_filtered.columns:
@@ -280,7 +266,7 @@ with tab1:
                    .reset_index().sort_values("Doanh_thu", ascending=False))
         st.dataframe(df_nhom, use_container_width=True)
 
-# TAB 2 – Doanh thu & Khối lượng
+# TAB 2
 with tab2:
     st.markdown('<div class="section-title">📈 Doanh thu & Khối lượng theo tháng</div>', unsafe_allow_html=True)
     if "Tháng" in df_filtered.columns:
@@ -295,7 +281,7 @@ with tab2:
                                  mode="lines+markers"), row=2, col=1)
         st.plotly_chart(fig, use_container_width=True)
 
-# TAB 3 – Lợi nhuận & Chính sách
+# TAB 3
 with tab3:
     st.markdown('<div class="section-title">💹 Lợi nhuận & Chính sách</div>', unsafe_allow_html=True)
     if "Tháng" in df_filtered.columns:
@@ -307,7 +293,7 @@ with tab3:
         fig2 = px.line(df_ln, x="Tháng", y="Biên (%)", markers=True, title="Biên lợi nhuận theo tháng")
         st.plotly_chart(fig2, use_container_width=True)
 
-# TAB 4 – Giao hàng
+# TAB 4
 with tab4:
     st.markdown('<div class="section-title">🚚 Hình thức & địa điểm giao hàng</div>', unsafe_allow_html=True)
     if "Nơi giao hàng" in df_filtered.columns:
@@ -315,7 +301,7 @@ with tab4:
         df_noi.columns = ["Địa điểm","Số lần"]
         st.dataframe(df_noi, use_container_width=True)
 
-# TAB 5 – BCCN & Rủi ro
+# TAB 5
 with tab5:
     st.markdown('<div class="section-title">📄 BCCN & Rủi ro</div>', unsafe_allow_html=True)
     if "Ghi chú" in df_filtered.columns:
@@ -323,7 +309,7 @@ with tab5:
         st.metric("↩️ Phiếu trả hàng", len(tra_hang))
         st.metric("💰 Giá trị trả hàng", f"{abs(tra_hang['Thành tiền bán'].sum()):,.0f}")
 
-# TAB 6 – Thị phần KH
+# TAB 6
 with tab6:
     st.markdown('<div class="section-title">🌍 Thị phần KH theo khu vực</div>', unsafe_allow_html=True)
     if "Khu vực" in df.columns and "Tên khách hàng" in df.columns:
@@ -334,7 +320,12 @@ with tab6:
         df_region["Rank"] = df_region.groupby("Khu vực")["Doanh_thu"].rank(method="dense", ascending=False)
         st.dataframe(df_region, use_container_width=True)
 
-# TAB 7 – Top KH theo Phòng KD
+# TAB 7
 with tab7:
     st.markdown('<div class="section-title">🏆 Top KH theo Phòng KD</div>', unsafe_allow_html=True)
-    if "Tên nhóm
+    if "Tên nhóm KH" in df.columns and "Tên khách hàng" in df.columns:
+        df_top = (df.groupby(["Tên nhóm KH","Tên khách hàng"])
+                  .agg(Doanh_thu=("Thành tiền bán","sum"))
+                  .reset_index())
+        df_top = df_top.sort_values(["Tên nhóm KH","Doanh_thu"], ascending=[True,False])
+        st.dataframe(df_top, use_container_width=True)
