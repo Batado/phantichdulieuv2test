@@ -224,14 +224,14 @@ st.sidebar.header("🔍 Bộ lọc")
 
 # 1. Phòng Kinh Doanh
 pkd_list = sorted(df["Tên nhóm KH"].dropna().unique()) if "Tên nhóm KH" in df.columns else []
-pkd = st.sidebar.multiselect("🏢 Phòng KD", pkd_list, default=pkd_list)
+pkd = st.sidebar.multiselect("🏢 Phòng KD", pkd_list)
 
-# 2. Khu vực
+# 2. Khu vực (lọc theo PKD)
 if pkd:
     kv_list = sorted(df[df["Tên nhóm KH"].isin(pkd)]["Khu vực"].dropna().unique()) if "Khu vực" in df.columns else []
 else:
     kv_list = sorted(df["Khu vực"].dropna().unique()) if "Khu vực" in df.columns else []
-kv = st.sidebar.multiselect("🌍 Khu vực", kv_list, default=kv_list)
+kv = st.sidebar.multiselect("🌍 Khu vực", kv_list)
 
 # 3. Khách hàng (lọc theo PKD + KV)
 if pkd and kv:
@@ -244,16 +244,16 @@ else:
     kh_list = sorted(df["Tên khách hàng"].dropna().unique())
 kh = st.sidebar.selectbox("👤 Khách hàng", kh_list) if kh_list else None
 
-# 4. Điểm rủi ro (lọc theo KH đã chọn)
+# 4. Điểm rủi ro (lọc theo KH)
 if kh:
     rr_list = sorted(df[df["Tên khách hàng"] == kh]["Rủi ro"].dropna().unique()) if "Rủi ro" in df.columns else []
 else:
     rr_list = sorted(df["Rủi ro"].dropna().unique()) if "Rủi ro" in df.columns else []
-rr = st.sidebar.multiselect("⚠️ Điểm rủi ro", rr_list, default=rr_list)
+rr = st.sidebar.multiselect("⚠️ Điểm rủi ro", rr_list)
 
-# 5. Quý (bổ sung thêm nếu cần)
+# 5. Quý
 quy_list = sorted(df["Quý"].dropna().unique()) if "Quý" in df.columns else []
-quy = st.sidebar.multiselect("📅 Quý", quy_list, default=quy_list)
+quy = st.sidebar.multiselect("📅 Quý", quy_list)
 
 # Áp dụng bộ lọc
 df_filtered = df.copy()
