@@ -9,19 +9,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 # CONFIG
-st.set_page_config(
-    page_title="Phân tích KH - Hoa Sen",
-    layout="wide",
-    page_icon="📊"
-)
-
-st.markdown("""
-<style>
-body { background-color: #0e1117; color: #c9d1d9; }
-.sidebar .sidebar-content { background-color: #161b22; }
-.section-title { font-size:18px; font-weight:700; color:#f0f6fc; margin:20px 0 10px 0; }
-</style>
-""", unsafe_allow_html=True)
+st.set_page_config(page_title="Phân tích KH - Hoa Sen", layout="wide", page_icon="📊")
 
 # UPLOAD
 st.sidebar.header("📂 Tải lên dữ liệu")
@@ -35,7 +23,21 @@ if not uploaded_file:
 @st.cache_data
 def load_data(file):
     df = pd.read_excel(file, engine="openpyxl")
-    df.columns = df.columns.str.strip()
+    # chuẩn hóa tên cột
+    df.columns = df.columns.str.strip().str.lower()
+    rename_map = {
+        "ngày chứng từ": "Ngày chứng từ",
+        "tên khách hàng": "Tên khách hàng",
+        "tên nhóm kh": "Tên nhóm KH",
+        "khu vực": "Khu vực",
+        "thành tiền bán": "Thành tiền bán",
+        "doanh thu": "Thành tiền bán",
+        "khối lượng": "Khối lượng",
+        "lợi nhuận": "Lợi nhuận",
+        "nơi giao hàng": "Nơi giao hàng",
+        "ghi chú": "Ghi chú"
+    }
+    df = df.rename(columns=rename_map)
     if "Ngày chứng từ" in df.columns:
         df["Ngày chứng từ"] = pd.to_datetime(df["Ngày chứng từ"], dayfirst=True, errors="coerce")
         df["Tháng"] = df["Ngày chứng từ"].dt.to_period("M").astype(str)
@@ -46,7 +48,6 @@ df = load_data(uploaded_file)
 
 # FILTERS
 st.sidebar.header("🔍 Bộ lọc")
-
 pkd_list = sorted(df["Tên nhóm KH"].dropna().unique()) if "Tên nhóm KH" in df.columns else []
 pkd = st.sidebar.multiselect("🏢 Phòng KD", pkd_list, default=pkd_list)
 
@@ -87,7 +88,6 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
 
 # TAB 1
 with tab1:
-    st.markdown('<div class="section-title">📦 Thói quen mua hàng theo sản phẩm</div>', unsafe_allow_html=True)
     if "Tên hàng" in df_filtered.columns:
         df_nhom = (df_filtered.groupby("Tên hàng")
                    .agg(Số_lần=("Tên hàng","count"),
@@ -97,7 +97,6 @@ with tab1:
 
 # TAB 2
 with tab2:
-    st.markdown('<div class="section-title">📈 Doanh thu & Khối lượng theo tháng</div>', unsafe_allow_html=True)
     if "Tháng" in df_filtered.columns:
         df_m = (df_filtered.groupby("Tháng")
                 .agg(Doanh_thu=("Thành tiền bán","sum"),
@@ -112,8 +111,7 @@ with tab2:
 
 # TAB 3
 with tab3:
-    st.markdown('<div class="section-title">💹 Lợi nhuận & Chính sách</div>', unsafe_allow_html=True)
-    if "Tháng" in df_filtered.columns:
+    if "Tháng" in df_filtered.columns and "Lợi nhuận" in df_filtered.columns:
         df_ln = (df_filtered.groupby("Tháng")
                  .agg(Doanh_thu=("Thành tiền bán","sum"),
                       Lợi_nhuận=("Lợi nhuận","sum"))
@@ -124,7 +122,6 @@ with tab3:
 
 # TAB 4
 with tab4:
-    st.markdown('<div class="section-title">🚚 Hình thức & địa điểm giao hàng</div>', unsafe_allow_html=True)
     if "Nơi giao hàng" in df_filtered.columns:
         df_noi = df_filtered["Nơi giao hàng"].value_counts().reset_index()
         df_noi.columns = ["Địa điểm","Số lần"]
@@ -132,7 +129,6 @@ with tab4:
 
 # TAB 5
 with tab5:
-    st.markdown('<div class="section-title">📄 BCCN & Rủi ro</div>', unsafe_allow_html=True)
     if "Ghi chú" in df_filtered.columns:
         tra_hang = df_filtered[df_filtered["Ghi chú"].str.contains("Trả hàng", na=False)]
         st.metric("↩️ Phiếu trả hàng", len(tra_hang))
@@ -140,7 +136,6 @@ with tab5:
 
 # TAB 6
 with tab6:
-    st.markdown('<div class="section-title">🌍 Thị phần KH theo khu vực</div>', unsafe_allow_html=True)
     if "Khu vực" in df.columns and "Tên khách hàng" in df.columns:
         df_region = (df.groupby(["Khu vực","Tên khách hàng"])
                      .agg(Doanh_thu=("Thành tiền bán","sum"))
@@ -151,7 +146,6 @@ with tab6:
 
 # TAB 7
 with tab7:
-    st.markdown('<div class="section-title">🏆 Top KH theo Phòng KD</div>', unsafe_allow_html=True)
     if "Tên nhóm KH" in df.columns and "Tên khách hàng" in df.columns:
         df_top = (df.groupby(["Tên nhóm KH","Tên khách hàng"])
                   .agg(Doanh_thu=("Thành tiền bán","sum"))
