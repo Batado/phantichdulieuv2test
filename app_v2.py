@@ -221,6 +221,15 @@ if df_all.empty:
 #  SIDEBAR FILTERS
 # ══════════════════════════════════════════════════════════════
 # Bộ lọc
+# Load dữ liệu
+df = load_data(uploaded_file)
+
+# Nếu không có dữ liệu thì dừng
+if df is None or df.empty:
+    st.error("❌ Không có dữ liệu hợp lệ trong file Excel.")
+    st.stop()
+
+# Bộ lọc
 st.sidebar.header("🔍 Bộ lọc")
 
 # 1. Phòng Kinh Doanh
@@ -228,29 +237,35 @@ pkd_list = sorted(df["Tên nhóm KH"].dropna().unique()) if "Tên nhóm KH" in d
 pkd = st.sidebar.multiselect("🏢 Phòng KD", pkd_list)
 
 # 2. Khu vực (lọc theo PKD)
-if pkd:
-    kv_list = sorted(df[df["Tên nhóm KH"].isin(pkd)]["Khu vực"].dropna().unique()) if "Khu vực" in df.columns else []
+if pkd and "Khu vực" in df.columns:
+    kv_list = sorted(df[df["Tên nhóm KH"].isin(pkd)]["Khu vực"].dropna().unique())
 else:
     kv_list = sorted(df["Khu vực"].dropna().unique()) if "Khu vực" in df.columns else []
 kv = st.sidebar.multiselect("🌍 Khu vực", kv_list)
 
 # 3. Khách hàng (lọc theo PKD + KV)
-if pkd and kv:
-    kh_list = sorted(df[(df["Tên nhóm KH"].isin(pkd)) & (df["Khu vực"].isin(kv))]["Tên khách hàng"].dropna().unique())
-elif pkd:
-    kh_list = sorted(df[df["Tên nhóm KH"].isin(pkd)]["Tên khách hàng"].dropna().unique())
-elif kv:
-    kh_list = sorted(df[df["Khu vực"].isin(kv)]["Tên khách hàng"].dropna().unique())
+if "Tên khách hàng" in df.columns:
+    if pkd and kv:
+        kh_list = sorted(df[(df["Tên nhóm KH"].isin(pkd)) & (df["Khu vực"].isin(kv))]["Tên khách hàng"].dropna().unique())
+    elif pkd:
+        kh_list = sorted(df[df["Tên nhóm KH"].isin(pkd)]["Tên khách hàng"].dropna().unique())
+    elif kv:
+        kh_list = sorted(df[df["Khu vực"].isin(kv)]["Tên khách hàng"].dropna().unique())
+    else:
+        kh_list = sorted(df["Tên khách hàng"].dropna().unique())
+    kh = st.sidebar.selectbox("👤 Khách hàng", kh_list) if kh_list else None
 else:
-    kh_list = sorted(df["Tên khách hàng"].dropna().unique())
-kh = st.sidebar.selectbox("👤 Khách hàng", kh_list) if kh_list else None
+    kh = None
 
 # 4. Điểm rủi ro (lọc theo KH)
-if kh:
-    rr_list = sorted(df[df["Tên khách hàng"] == kh]["Rủi ro"].dropna().unique()) if "Rủi ro" in df.columns else []
+if "Rủi ro" in df.columns:
+    if kh:
+        rr_list = sorted(df[df["Tên khách hàng"] == kh]["Rủi ro"].dropna().unique())
+    else:
+        rr_list = sorted(df["Rủi ro"].dropna().unique())
+    rr = st.sidebar.multiselect("⚠️ Điểm rủi ro", rr_list)
 else:
-    rr_list = sorted(df["Rủi ro"].dropna().unique()) if "Rủi ro" in df.columns else []
-rr = st.sidebar.multiselect("⚠️ Điểm rủi ro", rr_list)
+    rr = []
 
 # 5. Quý
 quy_list = sorted(df["Quý"].dropna().unique()) if "Quý" in df.columns else []
