@@ -26,17 +26,24 @@ def load_data(file):
     df.columns = df.columns.str.strip().str.lower()
     rename_map = {
         "ngày chứng từ": "Ngày chứng từ",
+        "ngay ct": "Ngày chứng từ",
         "tên khách hàng": "Tên khách hàng",
+        "khách hàng": "Tên khách hàng",
+        "ten kh": "Tên khách hàng",
         "tên nhóm kh": "Tên nhóm KH",
+        "phòng kd": "Tên nhóm KH",
         "khu vực": "Khu vực",
         "thành tiền bán": "Thành tiền bán",
         "doanh thu": "Thành tiền bán",
         "khối lượng": "Khối lượng",
+        "kl": "Khối lượng",
         "lợi nhuận": "Lợi nhuận",
+        "profit": "Lợi nhuận",
         "nơi giao hàng": "Nơi giao hàng",
-        "ghi chú": "Ghi chú"
+        "ghi chú": "Ghi chú",
+        "note": "Ghi chú"
     }
-    df = df.rename(columns=rename_map)
+    df = df.rename(columns=lambda c: rename_map.get(c, c))
     if "Ngày chứng từ" in df.columns:
         df["Ngày chứng từ"] = pd.to_datetime(df["Ngày chứng từ"], dayfirst=True, errors="coerce")
         df["Tháng"] = df["Ngày chứng từ"].dt.to_period("M").astype(str)
