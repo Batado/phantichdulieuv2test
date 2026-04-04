@@ -157,5 +157,31 @@ with tab6:
         df_region = (df.groupby(["Khu vực","Tên khách hàng"])
                      .agg(Doanh_thu=("Thành tiền bán","sum"))
                      .reset_index())
+        # Tính thị phần và xếp hạng
         df_region["Thị phần (%)"] = df_region.groupby("Khu vực")["Doanh_thu"].apply(lambda x: x/x.sum()*100)
-        df_region["Rank
+        df_region["Rank"] = df_region.groupby("Khu vực")["Doanh_thu"].rank(method="dense", ascending=False)
+
+        st.markdown("### 🌍 Thị phần khách hàng theo khu vực")
+        st.dataframe(df_region, use_container_width=True)
+
+        # Biểu đồ top 5 KH theo khu vực
+        df_top5 = df_region.groupby("Khu vực").apply(lambda x: x.nlargest(5, "Doanh_thu")).reset_index(drop=True)
+        fig4 = px.bar(df_top5, x="Tên khách hàng", y="Doanh_thu", color="Khu vực",
+                      title="Top 5 KH theo doanh thu từng khu vực")
+        st.plotly_chart(fig4, use_container_width=True)
+        # TAB 7
+with tab7:
+    if "Tên nhóm KH" in df.columns and "Tên khách hàng" in df.columns:
+        df_top = (df.groupby(["Tên nhóm KH","Tên khách hàng"])
+                  .agg(Doanh_thu=("Thành tiền bán","sum"))
+                  .reset_index())
+        df_top = df_top.sort_values(["Tên nhóm KH","Doanh_thu"], ascending=[True,False])
+
+        st.markdown("### 🏆 Top khách hàng theo Phòng KD")
+        st.dataframe(df_top, use_container_width=True)
+
+        # Biểu đồ top 5 KH theo từng Phòng KD
+        df_top5_pkd = df_top.groupby("Tên nhóm KH").apply(lambda x: x.nlargest(5, "Doanh_thu")).reset_index(drop=True)
+        fig5 = px.bar(df_top5_pkd, x="Tên khách hàng", y="Doanh_thu", color="Tên nhóm KH",
+                      title="Top 5 KH theo doanh thu từng Phòng KD")
+        st.plotly_chart(fig5, use_container_width=True)
