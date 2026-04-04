@@ -158,7 +158,7 @@ with tab6:
                      .agg(Doanh_thu=("Thành tiền bán","sum"))
                      .reset_index())
         df_region["Thị phần (%)"] = df_region.groupby("Khu vực")["Doanh_thu"].apply(lambda x: x/x.sum()*100)
-        df_region["Rank"] = df_region.groupby("Khu vực")["Doanh_thĐạt ơi, tôi sẽ viết lại toàn bộ code cho ứng dụng Streamlit theo đúng yêu cầu phân tích bạn đưa ra. Code này sẽ:
+        df_region["Rank"] = df_region.groupby("Khu vực")["Doanh_thu"]
 
 - Cho phép upload file Excel báo cáo bán hàng (OM_RPT_055).  
 - Bộ lọc theo **Phòng KD**, **Khu vực**, **Khách hàng**, **Quý**.  
