@@ -886,7 +886,7 @@ for lvl, msg in risks:
 # ======================================================
 
 with tab7:
-st.markdown(’<div class="section-title">Bang xep hang rui ro tat ca khach hang (thap den cao)</div>’, unsafe_allow_html=True)
+st.markdown('<div class="section-title">Bang xep hang rui ro tat ca khach hang (thap den cao)</div>', unsafe_allow_html=True)
 
 ```
 if not risk_table.empty:
