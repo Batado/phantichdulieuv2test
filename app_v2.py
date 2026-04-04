@@ -1,6 +1,6 @@
 import io
 import warnings
-warnings.filterwarnings(“ignore”)
+warnings.filterwarnings("ignore")
 import unicodedata
 
 import streamlit as st
