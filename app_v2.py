@@ -223,73 +223,28 @@ if df_all.empty:
 st.sidebar.markdown("---")
 st.sidebar.markdown("## 🔍 Bộ lọc")
 
-# 1. Lọc theo Phòng Kinh Doanh
-if "Phòng KD" in df_all.columns:
-    phong_kd_list = sorted(df_all["Phòng KD"].dropna().unique())  # Danh sách các Phòng KD
-    phong_kd = st.sidebar.multiselect(
-        "🏢 Phòng Kinh Doanh", 
-        phong_kd_list, 
-        default=phong_kd_list
+# 1. Lọc theo Phòng Kinh Doanh (Mã nhóm KH)
+if "Mã nhóm KH" in df_all.columns:
+    unique_departments = sorted(df_all["Mã nhóm KH"].dropna().unique())
+    selected_departments = st.sidebar.multiselect(
+        "🏢 Phòng Kinh Doanh (Mã nhóm KH)", 
+        unique_departments, 
+        default=unique_departments
     )
-    df_filtered = df_all[df_all["Phòng KD"].isin(phong_kd)]
+    df_filtered = df_all[df_all["Mã nhóm KH"].isin(selected_departments)]  # Lọc theo Mã nhóm KH
 else:
-    st.warning("❌ Không tìm thấy cột 'Phòng KD'. Bộ lọc này sẽ bị bỏ qua.")
+    st.warning("❌ Không tìm thấy cột `Mã nhóm KH`. Bộ lọc này sẽ bị bỏ qua.")
     df_filtered = df_all.copy()
 
-# 2. Lọc theo Khu Vực
+# 2. Lọc theo Khu vực
 if "Khu vực" in df_filtered.columns:
-    khu_vuc_list = sorted(df_filtered["Khu vực"].dropna().unique())  # Danh sách các Khu vực
-    khu_vuc = st.sidebar.multiselect(
+    unique_areas = sorted(df_filtered["Khu vực"].dropna().unique())
+    selected_areas = st.sidebar.multiselect(
         "📍 Khu vực", 
-        khu_vuc_list, 
-        default=khu_vuc_list
+        unique_areas, 
+        default=unique_areas
     )
-    df_filtered = df_filtered[df_filtered["Khu vực"].isin(khu_vuc)]
-else:
-    st.warning("❌ Không tìm thấy cột 'Khu vực'. Bộ lọc này sẽ bị bỏ qua.")
-
-# 3. Lọc theo Tên Khách Hàng
-if "Tên khách hàng" in df_filtered.columns:
-    kh_list = sorted(df_filtered["Tên khách hàng"].dropna().unique())  # Danh sách các Khách Hàng
-    kh = st.sidebar.selectbox(
-        "👤 Khách hàng", 
-        options=["Tất cả"] + kh_list
-    )  # Thêm "Tất cả" để không lọc theo Khách Hàng
-    if kh != "Tất cả":
-        df_filtered = df_filtered[df_filtered["Tên khách hàng"] == kh]
-else:
-    st.warning("❌ Không tìm thấy cột 'Tên khách hàng'. Bộ lọc này sẽ bị bỏ qua.")
-
-# 4. Lọc và sắp xếp theo Điểm Rủi Ro
-if "Điểm rủi ro" in df_filtered.columns:
-    sort_risk = st.sidebar.checkbox("📊 Sắp xếp theo Điểm Rủi Ro (Cao → Thấp)", value=True)
-    if sort_risk:
-        df_filtered = df_filtered.sort_values(by="Điểm rủi ro", ascending=False)  # Sắp xếp
-else:
-    st.warning("❌ Không tìm thấy cột 'Điểm rủi ro'. Bộ lọc này sẽ bị bỏ qua.")
-
-# Phân tích dữ liệu sau lọc
-df_ban = df_filtered[df_filtered["Loại GD"] == "Xuất bán"].copy()
-
-# Hiển thị thông tin header và dữ liệu đã lọc
-ngay_min = df_filtered["Ngày chứng từ"].min()
-ngay_max = df_filtered["Ngày chứng từ"].max()
-so_hoa_don = df_filtered["Số chứng từ"].nunique() if "Số chứng từ" in df_filtered.columns else "?"
-
-st.markdown(f"# 📊 Phân tích dữ liệu")
-st.markdown(f"**Phòng KD:** {', '.join(phong_kd) if phong_kd else 'Tất cả'}")
-st.markdown(f"**Khu vực:** {', '.join(khu_vuc) if khu_vuc else 'Tất cả'}")
-st.markdown(f"**Khách hàng:** {kh if kh != 'Tất cả' else 'Tất cả'}")
-st.markdown(f"""
-- Thời gian: {ngay_min.strftime('%d/%m/%Y') if pd.notna(ngay_min) else '?'} → 
-             {ngay_max.strftime('%d/%m/%Y') if pd.notna(ngay_max) else '?'}
-- Tổng dòng: {len(df_filtered):,} dòng
-- Tổng số chứng từ: {so_hoa_don}
-""")
-
-if df_ban.empty:
-    st.warning("Không có dữ liệu xuất bán cho bộ lọc đã chọn.")
-    st.stop()
+    df_filtered = df_filtered[df_filtered["Khu vực"].isin(selected_areas)]  # Lọc theo
 
 # ══════════════════════════════════════════════════════════════
 #  TABS
