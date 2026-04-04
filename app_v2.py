@@ -94,7 +94,7 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
     "🚚 Giao hàng",
     "📄 BCCN & Rủi ro",
     "🌍 Thị phần KH",
-    "📊 Top KH theo Phòng KD"
+    "🏆 Top KH theo Phòng KD"
 ])
 
 # TAB 1 – Thói quen mua hàng
@@ -153,27 +153,22 @@ with tab5:
 # TAB 6 – Thị phần KH
 with tab6:
     st.markdown('<div class="section-title">🌍 Thị phần KH theo khu vực</div>', unsafe_allow_html=True)
-    if "Khu vực" in df_filtered.columns and "Tên khách hàng" in df_filtered.columns:
+    if "Khu vực" in df.columns and "Tên khách hàng" in df.columns:
         df_region = (df.groupby(["Khu vực","Tên khách hàng"])
                      .agg(Doanh_thu=("Thành tiền bán","sum"))
                      .reset_index())
         df_region["Thị phần (%)"] = df_region.groupby("Khu vực")["Doanh_thu"].apply(lambda x: x/x.sum()*100)
-        df_region["Rank"] = df_region.groupby("Khu vực")["Doanh_thu"]
+        df_region["Rank"] = df_region.groupby("Khu vực")["Doanh_thu"].rank(method="dense", ascending=False)
+        st.dataframe(df_region, use_container_width=True)
 
-- Cho phép upload file Excel báo cáo bán hàng (OM_RPT_055).  
-- Bộ lọc theo **Phòng KD**, **Khu vực**, **Khách hàng**, **Quý**.  
-- Phân tích:  
-  - Thói quen mua hàng theo sản phẩm (mục đích sử dụng).  
-  - Doanh thu, sản lượng, khối lượng theo tháng/quý (biểu đồ).  
-  - Lợi nhuận, phát hiện chiết khấu/chính sách bất thường.  
-  - Giao hàng: hình thức, địa điểm.  
-  - BCCN: thói quen thanh toán, đơn hàng rủi ro.  
-  - Thị phần KH theo khu vực/phòng KD, top KH.  
-  - Điểm rủi ro (thấp/trung bình/cao).  
+# TAB 7 – Top KH theo Phòng KD
+with tab7:
+    st.markdown('<div class="section-title">🏆 Top KH theo Phòng KD</div>', unsafe_allow_html=True)
+   Đạt ơi, lỗi line 163 là do đoạn code bị viết dở dang, thiếu đóng ngoặc và thiếu phần hiển thị bảng/thị phần. Tôi đã viết lại toàn bộ file `app.py` hoàn chỉnh, sạch cú pháp, để bạn có thể copy lên GitHub và chạy ngay trên Streamlit Cloud.  
 
 ---
 
-### 📦 File `app.py`
+### 📦 Code hoàn chỉnh
 
 ```python
 import io
@@ -331,5 +326,15 @@ with tab5:
 # TAB 6 – Thị phần KH
 with tab6:
     st.markdown('<div class="section-title">🌍 Thị phần KH theo khu vực</div>', unsafe_allow_html=True)
-    if "Khu vực" in df_filtered.columns and "Tên khách hàng" in df_filtered.columns:
+    if "Khu vực" in df.columns and "Tên khách hàng" in df.columns:
         df_region = (df.groupby(["Khu vực","Tên khách hàng"])
+                     .agg(Doanh_thu=("Thành tiền bán","sum"))
+                     .reset_index())
+        df_region["Thị phần (%)"] = df_region.groupby("Khu vực")["Doanh_thu"].apply(lambda x: x/x.sum()*100)
+        df_region["Rank"] = df_region.groupby("Khu vực")["Doanh_thu"].rank(method="dense", ascending=False)
+        st.dataframe(df_region, use_container_width=True)
+
+# TAB 7 – Top KH theo Phòng KD
+with tab7:
+    st.markdown('<div class="section-title">🏆 Top KH theo Phòng KD</div>', unsafe_allow_html=True)
+    if "Tên nhóm
