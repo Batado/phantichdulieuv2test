@@ -223,30 +223,35 @@ if df_all.empty:
 st.sidebar.markdown("---")
 st.sidebar.markdown("## 🔍 Bộ lọc")
 
+# Khách hàng
 kh_list = sorted(df_all["Tên khách hàng"].dropna().astype(str).unique())
 kh = st.sidebar.selectbox("👤 Khách hàng", kh_list)
 
+# Quý
 quy_list = sorted(df_all["Quý"].dropna().unique())
 quy_chon = st.sidebar.multiselect("📅 Quý", quy_list, default=quy_list)
 
-df = df_all[
-    (df_all["Tên khách hàng"].astype(str) == kh) &
-    (df_all["Quý"].isin(quy_chon))
-].copy()
+# Phòng Kinh Doanh
+pkd_list = sorted(df_all["Tên nhóm KH"].dropna().astype(str).unique()) if "Tên nhóm KH" in df_all.columns else []
+pkd_chon = st.sidebar.multiselect("🏢 Phòng Kinh Doanh", pkd_list, default=pkd_list)
+
+# Khu vực
+kv_list = sorted(df_all["Khu vực"].dropna().astype(str).unique()) if "Khu vực" in df_all.columns else []
+kv_chon = st.sidebar.multiselect("🌍 Khu vực", kv_list, default=kv_list)
+
+# Điểm rủi ro
+rr_list = sorted(df_all["Rủi ro"].dropna().astype(str).unique()) if "Rủi ro" in df_all.columns else []
+rr_chon = st.sidebar.multiselect("⚠️ Điểm rủi ro", rr_list, default=rr_list)
+
+# Áp dụng bộ lọc
+df = df_all.copy()
+df = df[df["Tên khách hàng"].astype(str) == kh]
+if quy_chon: df = df[df["Quý"].isin(quy_chon)]
+if pkd_chon: df = df[df["Tên nhóm KH"].isin(pkd_chon)]
+if kv_chon: df = df[df["Khu vực"].isin(kv_chon)]
+if rr_chon: df = df[df["Rủi ro"].isin(rr_chon)]
 
 df_ban = df[df["Loại GD"] == "Xuất bán"].copy()
-
-# Header
-ngay_min = df["Ngày chứng từ"].min()
-ngay_max = df["Ngày chứng từ"].max()
-st.markdown(f"# 📊 Phân tích: **{kh}**")
-st.markdown(f"*Dữ liệu: {ngay_min.strftime('%d/%m/%Y') if pd.notna(ngay_min) else '?'} → "
-            f"{ngay_max.strftime('%d/%m/%Y') if pd.notna(ngay_max) else '?'} "
-            f"| {len(df):,} dòng | {df['Số chứng từ'].nunique() if 'Số chứng từ' in df.columns else '?'} chứng từ*")
-
-if df_ban.empty:
-    st.warning("Không có dữ liệu xuất bán cho bộ lọc đã chọn.")
-    st.stop()
 
 # ══════════════════════════════════════════════════════════════
 #  TABS
