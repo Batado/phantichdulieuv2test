@@ -35,7 +35,8 @@ def load_data(file):
         "nơi giao hàng": "Nơi giao hàng",
         "ghi chú": "Ghi chú",
         "bccn": "BCCN",
-        "rủi ro": "Rủi ro"
+        "rủi ro": "Rủi ro",
+        "tên hàng": "Tên hàng"
     }
     df = df.rename(columns=lambda c: rename_map.get(c, c))
     if "Ngày chứng từ" in df.columns:
@@ -148,23 +149,20 @@ with tab5:
     if "Ghi chú" in df_filtered.columns:
         tra_hang = df_filtered[df_filtered["Ghi chú"].str.contains("Trả hàng", na=False)]
         st.metric("↩️ Phiếu trả hàng", len(tra_hang))
-Đạt ơi, tôi sẽ viết lại code mới hoàn chỉnh cho ứng dụng Streamlit theo đúng yêu cầu phân tích của bạn. Code này:
+        st.metric("💰 Giá trị trả hàng", f"{abs(tra_hang['Thành tiền bán'].sum()):,.0f}")
 
-- Cho phép upload file Excel OM_RPT_055.  
-- Chuẩn hóa tên cột để tránh lỗi.  
-- Bộ lọc theo **Phòng KD**, **Khu vực**, **Khách hàng**, **Quý**, **Điểm rủi ro**.  
-- Các tab phân tích:  
-  - Thói quen mua hàng theo sản phẩm (biểu đồ tròn).  
-  - Doanh thu & khối lượng theo tháng/quý (biểu đồ cột + đường).  
-  - Lợi nhuận (biểu đồ đường).  
-  - Giao hàng (biểu đồ cột).  
-  - BCCN & rủi ro (thanh toán, phiếu trả hàng).  
-  - Thị phần KH theo khu vực (bảng + top).  
-  - Top KH theo Phòng KD.  
+# TAB 6
+with tab6:
+    if "Khu vực" in df.columns and "Tên khách hàng" in df.columns:
+        df_region = (df.groupby(["Khu vực","Tên khách hàng"])
+                     .agg(Doanh_thu=("Thành tiền bán","sum"))
+                     .reset_index())
+        df_region["Thị phần (%)"] = df_region.groupby("Khu vực")["Doanh_thu"].apply(lambda x: x/x.sum()*100)
+        df_region["Đạt ơi, tôi đã nắm rõ yêu cầu của bạn. Lỗi trước đó là do code bị bỏ dở (chuỗi chưa đóng) và thiếu thư viện. Tôi sẽ viết lại **toàn bộ code mới** cho ứng dụng Streamlit, gọn gàng, không lỗi cú pháp, có đầy đủ các tab phân tích như bạn yêu cầu:
 
 ---
 
-### 📦 File `app.py`
+### 📦 File `app_v2.py`
 
 ```python
 import io
@@ -318,4 +316,13 @@ with tab5:
     if "Ghi chú" in df_filtered.columns:
         tra_hang = df_filtered[df_filtered["Ghi chú"].str.contains("Trả hàng", na=False)]
         st.metric("↩️ Phiếu trả hàng", len(tra_hang))
-        st.metric("
+        st.metric("💰 Giá trị trả hàng", f"{abs(tra_hang['Thành tiền bán'].sum()):,.0f}")
+
+# TAB 6
+with tab6:
+    if "Khu vực" in df.columns and "Tên khách hàng" in df.columns:
+        df_region = (df.groupby(["Khu vực","Tên khách hàng"])
+                     .agg(Doanh_thu=("Thành tiền bán","sum"))
+                     .reset_index())
+        df_region["Thị phần (%)"] = df_region.groupby("Khu vực")["Doanh_thu"].apply(lambda x: x/x.sum()*100)
+        df_region["Rank
