@@ -262,7 +262,7 @@ risk_table = build_risk_table(file_data)
 # ======================================================
 st.sidebar.markdown("---")
 st.sidebar.markdown("## Bo loc")
-# ── Level 1: Phong KD (Ten nhom KH) ──
+# -- Level 1: Phong KD (Ten nhom KH) --
 has_nhom = "Ten nhom KH" in df_all.columns
 if has_nhom:
 nhom_opts = sorted([x for x in df_all["Ten nhom KH"].unique() if x not in ("", "nan", "No
@@ -283,7 +283,7 @@ nhom_chon = nhom_opts
 else:
 nhom_chon = []
 df_after_nhom = df_all.copy()
-# ── Level 2: Khu vuc (filtered by Phong KD) ──
+# -- Level 2: Khu vuc (filtered by Phong KD) --
 has_kv = "Khu vuc" in df_after_nhom.columns
 if has_kv:
 kv_opts = sorted([x for x in df_after_nhom["Khu vuc"].unique() if x not in ("", "nan", "N
@@ -304,7 +304,7 @@ kv_chon = kv_opts
 else:
 kv_chon = []
 df_after_kv = df_after_nhom.copy()
-# ── Level 3: Ten KH sorted by risk score asc (thap den cao) ──
+# -- Level 3: Ten KH sorted by risk score asc (thap den cao) --
 kh_in_scope = sorted([x for x in df_after_kv["Ten khach hang"].unique()
 if x not in ("", "nan", "None")])
 if not kh_in_scope:
@@ -334,7 +334,7 @@ kh_display,
 help="Khach hang duoc sap xep tu rui ro THAP nhat den CAO nhat"
 )
 kh = display_to_name.get(selected_display, kh_sorted[0] if kh_sorted else "")
-# ── Level 4: Quy ──
+# -- Level 4: Quy --
 quy_opts = sorted(df_after_kv["Quy"].dropna().unique().tolist())
 quy_chon = st.sidebar.multiselect("4. Quy", quy_opts, default=quy_opts)
 if not quy_chon:
